@@ -28,3 +28,12 @@ footer:
 code:
   background-color: transparent
   border-color: transparent
+role:
+  severity-low:
+    background-color: #006bbf
+  severity-medium:
+    background-color: #f5c648
+  severity-high:
+    background-color: #f4861d
+  severity-critical:
+    background-color: #bc012f
