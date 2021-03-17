@@ -57,6 +57,7 @@ import org.ossreviewtoolkit.model.licenses.LicenseInfoResolver
 import org.ossreviewtoolkit.model.licenses.orEmpty
 import org.ossreviewtoolkit.model.mapper
 import org.ossreviewtoolkit.model.readValue
+import org.ossreviewtoolkit.model.utils.SimplePackageConfigurationProvider
 import org.ossreviewtoolkit.model.utils.mergeLabels
 import org.ossreviewtoolkit.utils.ORT_COPYRIGHT_GARBAGE_FILENAME
 import org.ossreviewtoolkit.utils.ORT_LICENSE_CLASSIFICATIONS_FILENAME
@@ -127,24 +128,20 @@ class EvaluatorCommand : CliktCommand(name = "evaluate", help = "Evaluate ORT re
         .default(ortConfigDirectory.resolve(ORT_LICENSE_CLASSIFICATIONS_FILENAME))
         .configurationGroup()
 
-    private val packageConfigurationOption by mutuallyExclusiveOptions(
-        option(
-            "--package-configuration-dir",
-            help = "A directory that is searched recursively for package configuration files. Each file must only " +
-                    "contain a single package configuration. Must not be used together with " +
-                    "'--package-configuration-file'."
-        ).convert { it.expandTilde() }
-            .file(mustExist = true, canBeFile = false, canBeDir = true, mustBeWritable = false, mustBeReadable = true)
-            .convert { PackageConfigurationOption.Dir(it.absoluteFile.normalize()) },
-        option(
-            "--package-configuration-file",
-            help = "A file containing a list of package configurations. Must not be used together with " +
-                    "'--package-configuration-dir'."
-        ).convert { it.expandTilde() }
-            .file(mustExist = true, canBeFile = true, canBeDir = false, mustBeWritable = false, mustBeReadable = true)
-            .convert { PackageConfigurationOption.File(it.absoluteFile.normalize()) },
-        name = OPTION_GROUP_CONFIGURATION
-    ).single()
+    private val packageConfigurationDir = option(
+        "--package-configuration-dir",
+        help = "A directory that is searched recursively for package configuration files. Each file must only " +
+                "contain a single package configuration."
+    ).convert { it.expandTilde() }
+        .file(mustExist = true, canBeFile = false, canBeDir = true, mustBeWritable = false, mustBeReadable = true)
+        .configurationGroup()
+
+    private val packageConfigurationFile =  option(
+        "--package-configuration-file",
+        help = "A file containing a list of package configurations."
+    ).convert { it.expandTilde() }
+        .file(mustExist = true, canBeFile = true, canBeDir = false, mustBeWritable = false, mustBeReadable = true)
+        .configurationGroup()
 
     private val packageCurationsFile by option(
         "--package-curations-file",
@@ -252,6 +249,7 @@ class EvaluatorCommand : CliktCommand(name = "evaluate", help = "Evaluate ORT re
             "The '--ort-file' option is required unless the '--check-syntax' option is used."
         }
 
+        val a = packageConfigurationDir
         val packageConfigurationProvider = packageConfigurationOption.createProvider()
         val copyrightGarbage = copyrightGarbageFile.takeIf { it.isFile }?.readValue<CopyrightGarbage>().orEmpty()
 
