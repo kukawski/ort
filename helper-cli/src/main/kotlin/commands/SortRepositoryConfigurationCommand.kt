@@ -42,9 +42,7 @@ internal class SortRepositoryConfigurationCommand : CliktCommand(
         .convert { it.absoluteFile.normalize() }
 
     override fun run() {
-        repositoryConfigurationFile
-            .readValue<RepositoryConfiguration>()
-            .sortEntries()
-            .writeAsYaml(repositoryConfigurationFile)
+        repositoryConfigurationFile.readValue<RepositoryConfiguration>()
+            ?.sortEntries()?.writeAsYaml(repositoryConfigurationFile)
     }
 }

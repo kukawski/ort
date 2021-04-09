@@ -41,8 +41,6 @@ internal class FormatCommand : CliktCommand(
         .convert { it.absoluteFile.normalize() }
 
     override fun run() {
-        packageConfigurationFile
-            .readValue<PackageConfiguration>()
-            .writeAsYaml(packageConfigurationFile)
+        packageConfigurationFile.readValue<PackageConfiguration>()?.writeAsYaml(packageConfigurationFile)
     }
 }

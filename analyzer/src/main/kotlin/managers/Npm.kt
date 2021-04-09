@@ -226,7 +226,7 @@ open class Npm(
 
             log.debug { "Found a 'package.json' file in '$packageDir'." }
 
-            val json = it.readValue<ObjectNode>()
+            val json = it.readValue<ObjectNode>() ?: return@forEach
             val rawName = json["name"].textValue()
             val (namespace, name) = splitNamespaceAndName(rawName)
             val version = json["version"].textValue()

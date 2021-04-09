@@ -71,16 +71,16 @@ internal class ExportLicenseFindingCurationsCommand : CliktCommand(
     ).flag()
 
     override fun run() {
-        val localLicenseFindingCurations = ortFile
-            .readValue<OrtResult>()
+        val ortResult = requireNotNull(ortFile.readValue<OrtResult>()) {
+            "The provided ORT result file '${ortFile.canonicalPath}' has no content."
+        }
+
+        val localLicenseFindingCurations = ortResult
             .replaceConfig(repositoryConfigurationFile)
             .getRepositoryLicenseFindingCurations()
 
-        val globalLicenseFindingCurations = if (licenseFindingCurationsFile.isFile) {
-            licenseFindingCurationsFile.readValue<RepositoryLicenseFindingCurations>()
-        } else {
-            mapOf()
-        }
+        val globalLicenseFindingCurations = licenseFindingCurationsFile.takeIf { it.isFile }
+            ?.readValue<RepositoryLicenseFindingCurations>().orEmpty()
 
         globalLicenseFindingCurations
             .mergeLicenseFindingCurations(localLicenseFindingCurations, updateOnlyExisting = updateOnlyExisting)
