@@ -180,15 +180,21 @@ class DownloaderCommand : CliktCommand(name = "download", help = "Fetch source c
         when (input) {
             is FileType -> {
                 val ortFile = (input as FileType).file
-                val (analyzerResult, duration) = measureTimedValue { ortFile.readValue<OrtResult>().analyzer?.result }
+                val (ortResult, duration) = measureTimedValue { ortFile.readValue<OrtResult>() }
 
                 log.perf {
                     "Read ORT result from '${ortFile.name}' (${ortFile.formatSizeInMib}) in " +
                             "${duration.inMilliseconds}ms."
                 }
 
-                requireNotNull(analyzerResult) {
-                    "The provided ORT result file '${ortFile.canonicalPath}' does not contain an analyzer result."
+                val analyzerResult = ortResult.analyzer?.result
+
+                if (analyzerResult == null) {
+                    log.warn {
+                        "The provided ORT result file '${ortFile.canonicalPath}' does not contain an analyzer result."
+                    }
+
+                    throw ProgramResult(0)
                 }
 
                 val packages = mutableListOf<Package>().apply {

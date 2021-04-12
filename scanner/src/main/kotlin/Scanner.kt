@@ -108,8 +108,12 @@ abstract class Scanner(
             "Read ORT result from '${ortFile.name}' (${ortFile.formatSizeInMib}) in ${duration.inMilliseconds}ms."
         }
 
-        requireNotNull(ortResult.analyzer) {
-            "The provided ORT result file '${ortFile.canonicalPath}' does not contain an analyzer result."
+        if (ortResult.analyzer == null) {
+            log.warn {
+                "The provided ORT result file '${ortFile.canonicalPath}' does not contain an analyzer result."
+            }
+
+            return ortResult
         }
 
         // Add the projects as packages to scan.
